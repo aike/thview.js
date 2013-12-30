@@ -50,7 +50,7 @@ http://aikelab.net/thview/
 
 ##NOTE
  - ThView.js requires web server. It does not work from local file.
- - The image file must be located on same origin.
+ - The image file must be located at same origin.
 
 ##Credit
 ThView.js is licenced under MIT License. Copyright 2013, aike (@aike1000)

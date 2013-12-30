@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ThView.js - JavaScript Spherical Image Viewer</title>
+    <script type="text/javascript" src="three.min.js"></script>
+    <script type="text/javascript" src="thview.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+    if (location.href.match(/^file:/))
+        document.write('<span style="color:#ff2222;">NOTE: ThView.js cannot work from local file. Use web server.</span>');
+    </script>
+    <h2>ThView.js - JavaScript Spherical Image Viewer</h2>
+    <p>
+    <a href="http://aikelab.net/thview/" target="_blank">demo site</a>
+    </p>
+    <p>
+    <a href="https://github.com/aike/thview.js" target="_blank">github</a>
+    </p>
+
+    <div id="image1"></div>
+    <script type="text/javascript" >
+        var img1 = new ThView({id:'image1', file:'images/thview.jpg'});
+    </script>
+
+    <p>
+    click: rotation on/off
+    </p>
+
+    <div id="image2"></div>
+    <script type="text/javascript" >
+        var img2 = new ThView({
+            id:'image2', file:'images/thview2.jpg',
+            firstview:180,
+            zoom:100,
+            width:300, height:200,
+            rotation:true, speed:-30});
+    </script>
+
+    <p>
+    drag operation is not supported yet.
+    </p>
+
+</body>
+</html>

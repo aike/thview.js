@@ -1,4 +1,4 @@
-#ThView.js - JavaScript Spherical Image Viewer
+##ThView.js - JavaScript Spherical Image Viewer
 
 ##Description
 ThView.js is a JavaScript image viewer program which shows spherical image photograph like [RICOH THETA](https://theta360.com/en/).
@@ -46,7 +46,7 @@ with customize option
 | degree | array of axis angle [x, y, z]| [0..360,0..360,0..360] | [0,0,0] |
 
 ##Demo Page
-http://aikelab.net/thview
+http://aikelab.net/thview/
 
 ##NOTE
  - ThView.js requires web server. It does not work from local file.

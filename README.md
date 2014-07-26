@@ -41,7 +41,7 @@ with customize option
 | height  | height of view area | number | 300  |
 | rotation  | start rotation on page load | true/false | false  |
 | speed    | rotation speed | -100..100 | 10 |
-| zoom    | zoom up image | 10..500 | 70 |
+| zoom    | zoom up image | 20..130 | 70 |
 | firstview | degree of initial image | 0..360 | 0 |
 | degree | array of axis angle [x, y, z]| [0..360,0..360,0..360] | [0,0,0] |
 
@@ -53,4 +53,4 @@ http://aikelab.net/thview/
  - The image file must be located at same origin.
 
 ##Credit
-ThView.js is licenced under MIT License. Copyright 2013, aike (@aike1000)
+ThView.js is licenced under MIT License. Copyright 2014, aike (@aike1000)

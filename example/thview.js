@@ -77,6 +77,9 @@ ThView.prototype.zoomCamera = function(val) {
 ThView.prototype.show = function() {
 	var self = this;
 	this.element = document.getElementById(this.id);
+	this.element.style.height = this.height + 'px';
+	this.element.style.width = this.width + 'px';
+	this.element.style.cursor = 'move';
 
 	///////// RENDERER
 	var renderer;
@@ -102,8 +105,19 @@ ThView.prototype.show = function() {
 		self.oldPosition = {x:e.pageX, y:e.pageY};
 	};
 	this.element.onmousemove = function(e) { self.rotateCamera(e.pageX, e.pageY); };
-	this.element.onmousewheel = function(e) { self.zoomCamera(e.deltaY); };
 	this.element.onclick = function() {self.toggleRotation();};
+
+	// chrome / safari / IE
+	this.element.onmousewheel = function(e) {
+		var delta = e.deltaY ? e.deltaY : e.wheelDelta ? -e.wheelDelta : -e.wheelDeltaY * 0.2;
+		self.zoomCamera(delta);
+		e.preventDefault();
+	};
+	// firefox
+	this.element.addEventListener("DOMMouseScroll", function(e) {
+		self.zoomCamera(e.detail * 5);
+		e.preventDefault();
+	});
 
 	///////// SCENE
 	var scene = new THREE.Scene();

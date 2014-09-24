@@ -77,6 +77,9 @@ ThView.prototype.zoomCamera = function(val) {
 ThView.prototype.show = function() {
 	var self = this;
 	this.element = document.getElementById(this.id);
+	this.element.style.height = this.height + 'px';
+	this.element.style.width = this.width + 'px';
+	this.element.style.cursor = 'move';
 
 	///////// RENDERER
 	var renderer;

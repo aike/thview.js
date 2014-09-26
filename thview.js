@@ -6,7 +6,7 @@
  */
 
 var ThView = function(arg) {
-	var d2r = function(d) { return d * Math.PI / 180; };
+	this.d2r = function(d) { return d * Math.PI / 180; };
 	this.id = arg.id;											// id of parent element *required*
 	this.file = arg.file;										// filename *required*
 	// note: image file must be located at same origin
@@ -17,9 +17,9 @@ var ThView = function(arg) {
 	this.speed = (arg.speed == undefined) ?
 			0.001 * 10 / 10 : 0.001 * arg.speed / 10;						// -100..-1, 1..100 (10)
 	this.zoom = (arg.zoom == undefined) ? 70 : arg.zoom;					// 20 .. 130 (70)
-	this.firstview = (arg.firstview == undefined) ? 0 : d2r(-arg.firstview);// 0 .. 360 (0)
+	this.firstview = (arg.firstview == undefined) ? 0 : this.d2r(-arg.firstview);// 0 .. 360 (0)
 	this.degree = (arg.degree == undefined) ? [0, 0, 0]						// [0,0,0] .. [360,360,360] ([0,0,0])
-					: [d2r(arg.degree[0]), d2r(arg.degree[1]), d2r(arg.degree[2])];
+					: [this.d2r(arg.degree[0]), this.d2r(arg.degree[1]), this.d2r(arg.degree[2])];
 	this.rendererType = (arg.rendererType == undefined) ? 0 : arg.rendererType;	// 0,1,2 (0)
 
 	///////// camera direction
@@ -62,6 +62,18 @@ ThView.prototype.rotateCamera = function(x, y) {
 	this.camera.lookAt(this.cameraDir);
 	this.oldPosition = pos;
 }
+
+ThView.prototype.setCameraDir = function(alpha, beta, gamma) {
+	if (this.mesh && !this.rotateInit) {
+		this.mesh.rotation.x += Math.PI / 2;
+		this.rotation = false;
+		this.rotateInit = true;
+	}
+
+	this.camera.rotation.x = beta;
+	this.camera.rotation.y = gamma;
+	this.camera.rotation.z = alpha;
+};
 
 ///////// wheel callback
 ThView.prototype.zoomCamera = function(val) {
@@ -119,6 +131,13 @@ ThView.prototype.show = function() {
 		e.preventDefault();
 	});
 
+	// iOS
+	window.addEventListener("deviceorientation", function(e){
+		if (e.alpha) {
+			self.setCameraDir(self.d2r(e.alpha), self.d2r(e.beta), self.d2r(e.gamma));
+		}
+	});
+
 	///////// SCENE
 	var scene = new THREE.Scene();
 
@@ -126,6 +145,7 @@ ThView.prototype.show = function() {
 	this.camera = new THREE.PerspectiveCamera(this.zoom, this.width / this.height);
 	this.camera.position = new THREE.Vector3(0, 0, 0);
 	this.camera.lookAt(this.cameraDir);
+	this.camera.rotation.order = 'ZXY';
 	scene.add(this.camera);
 
 	///////// LIGHT
@@ -146,19 +166,19 @@ ThView.prototype.show = function() {
 		map: texture });
 
 	///////// MESH
-	var mesh = new THREE.Mesh(geometry, material);
+	this.mesh = new THREE.Mesh(geometry, material);
 	if (this.rendererType == 0)
-		mesh.rotation.x = Math.PI;
-	mesh.rotation.x += this.degree[0];
-	mesh.rotation.y += this.degree[1];
-	mesh.rotation.z += this.degree[2];
-	scene.add(mesh);
+		this.mesh.rotation.x += Math.PI;
+	this.mesh.rotation.x += this.degree[0];
+	this.mesh.rotation.y += this.degree[1];
+	this.mesh.rotation.z += this.degree[2];
+	scene.add(this.mesh);
 
 	///////// Draw Loop
 	function render() {
 		requestAnimationFrame(render);
 		if (self.rotation)
-			mesh.rotation.y += self.speed;
+			self.mesh.rotation.y += self.speed;
 		renderer.render(scene, self.camera);
 	};
 	render();

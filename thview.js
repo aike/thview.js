@@ -28,6 +28,7 @@ var ThView = function(arg) {
 	this.cameraDir = new THREE.Vector3(Math.sin(this.pan), Math.sin(this.tilt), Math.cos(this.pan));
 	this.oldPosition = {x:null, y:null};
 	this.mousedown = false;
+	this.viewRotate = 0;
 
 	///////// call main process
 	this.show();
@@ -66,13 +67,32 @@ ThView.prototype.rotateCamera = function(x, y) {
 ThView.prototype.setCameraDir = function(alpha, beta, gamma) {
 	if (this.mesh && !this.rotateInit) {
 		this.mesh.rotation.x += Math.PI / 2;
+		this.viewRotate = Math.abs(this.d2r(window.orientation));
 		this.rotation = false;
 		this.rotateInit = true;
 	}
 
-	this.camera.rotation.x = beta;
-	this.camera.rotation.y = gamma;
-	this.camera.rotation.z = alpha;
+	switch (window.orientation) {
+		case 0:
+			this.mesh.rotation.x = Math.PI + Math.PI / 2;
+			this.camera.rotation.x = beta + this.viewRotate;
+			this.camera.rotation.y = gamma;
+			this.camera.rotation.z = alpha;
+			break;
+		case 90:
+		case -90:
+			this.mesh.rotation.x = Math.PI + Math.PI / 2;
+			this.camera.rotation.x = gamma;// + this.viewRotate;
+			this.camera.rotation.y = beta;
+			this.camera.rotation.z = alpha;
+			break;
+		case 180:
+			this.mesh.rotation.x = Math.PI + Math.PI / 2;
+			this.camera.rotation.x = -beta;
+			this.camera.rotation.y = -gamma;
+			this.camera.rotation.z = alpha;
+			break;
+		}
 };
 
 ///////// wheel callback
@@ -135,7 +155,17 @@ ThView.prototype.show = function() {
 	window.addEventListener("deviceorientation", function(e){
 		if (e.alpha) {
 			self.setCameraDir(self.d2r(e.alpha), self.d2r(e.beta), self.d2r(e.gamma));
+		document.getElementById('debug').innerText = 
+		window.orientation + ' '
+		+ e.alpha.toFixed(0) + ' '
+		+ e.beta.toFixed(0) + ' '
+		+ e.gamma.toFixed(0) + ' '
+		;
 		}
+	});
+	window.addEventListener("orientationchange", function(e){
+		self.viewRotate = Math.abs(self.d2r(window.orientation));
+		document.getElementById('debug').innerText = window.orientation;
 	});
 
 	///////// SCENE

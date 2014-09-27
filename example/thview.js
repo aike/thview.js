@@ -70,9 +70,40 @@ ThView.prototype.setCameraDir = function(alpha, beta, gamma) {
 		this.rotateInit = true;
 	}
 
-	this.camera.rotation.x = beta;
-	this.camera.rotation.y = gamma;
-	this.camera.rotation.z = alpha;
+	switch (window.orientation) {
+		case 0:
+			this.mesh.rotation.x = this.degree[0] + Math.PI + Math.PI / 2;
+			this.mesh.rotation.y = this.degree[1];
+			this.mesh.rotation.z = this.degree[2];
+			this.camera.rotation.x = beta;
+			this.camera.rotation.y = gamma;
+			this.camera.rotation.z = alpha;
+			break;
+		case 90:
+			this.mesh.rotation.x = this.degree[0] + Math.PI;
+			this.mesh.rotation.y = this.degree[1] + alpha - Math.PI / 2;
+			this.mesh.rotation.z = this.degree[2];
+			this.camera.rotation.x = -gamma - Math.PI / 2;
+			this.camera.rotation.y = 0;
+			this.camera.rotation.z = -beta;
+			break;
+		case -90:
+			this.mesh.rotation.x = this.degree[0] + Math.PI;
+			this.mesh.rotation.y = this.degree[1] + alpha - Math.PI / 2;
+			this.mesh.rotation.z = this.degree[2] + 0;
+			this.camera.rotation.x = -(-gamma - Math.PI / 2);
+			this.camera.rotation.y = 0;
+			this.camera.rotation.z = -beta + Math.PI;
+			break;
+		case 180:
+			this.mesh.rotation.x = this.degree[0] + Math.PI + Math.PI / 2;
+			this.mesh.rotation.y = this.degree[1];
+			this.mesh.rotation.z = this.degree[2];
+			this.camera.rotation.x = -beta;
+			this.camera.rotation.y = -gamma;
+			this.camera.rotation.z = alpha + Math.PI;
+			break;
+		}
 };
 
 ///////// wheel callback
@@ -136,6 +167,8 @@ ThView.prototype.show = function() {
 		if (e.alpha) {
 			self.setCameraDir(self.d2r(e.alpha), self.d2r(e.beta), self.d2r(e.gamma));
 		}
+	});
+	window.addEventListener("orientationchange", function(e){
 	});
 
 	///////// SCENE

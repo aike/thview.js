@@ -8,8 +8,13 @@
 var ThView = function(arg) {
 	this.d2r = function(d) { return d * Math.PI / 180; };
 	this.id = arg.id;											// id of parent element *required*
-	this.file = arg.file;										// filename *required*
 	// note: image file must be located at same origin
+	if (arg.file instanceof Array) {
+		this.file = arg.file;									// filename *required*
+	} else {
+		this.file = [arg.file];
+	}
+	this.interval = (arg.interval == undefined) ? 500 : arg.interval;		// animation rate
 
 	this.width = (arg.width == undefined) ? 500 : arg.width;				// pixel (500)
 	this.height = (arg.height == undefined) ? 300 : arg.height;				// pixel (300)
@@ -28,6 +33,39 @@ var ThView = function(arg) {
 	this.cameraDir = new THREE.Vector3(Math.sin(this.pan), Math.sin(this.tilt), Math.cos(this.pan));
 	this.oldPosition = {x:null, y:null};
 	this.mousedown = false;
+	this.moving = false;
+
+	///////// interval images
+	this.imageNo = 0;
+
+	///////// parent element
+	this.element = document.getElementById(this.id);
+
+	///////// dual screen for HMD
+	if (arg.hmd) {
+		if (this.element.style.position === '')
+			this.element.style.position = 'relative';
+
+		this.width = Math.floor(arg.width / 2);
+		arg.width = this.width;
+		arg.id = arg.id + '_slave';
+		arg.hmd = undefined;
+
+		var slavediv = document.createElement('div');
+		slavediv.id = arg.id;
+		slavediv.style.position = 'absolute';
+		slavediv.style.left = this.width + 'px';
+		slavediv.style.top = 0 + 'px';
+		this.element.appendChild(slavediv);
+		arg.element = slavediv;
+
+		this.sync = new ThView(arg);
+		this.sync.sync = this;
+		this.sync.isSlave = true;
+	}
+	this.element.style.height = this.height + 'px';
+	this.element.style.width = this.width + 'px';
+	this.element.style.cursor = 'move';
 
 	///////// call main process
 	this.show();
@@ -36,7 +74,6 @@ var ThView = function(arg) {
 ThView.prototype.toggleRotation = function() {
 	this.rotation = ! this.rotation;
 }
-
 
 ///////// drag callback
 ThView.prototype.rotateCamera = function(x, y) {
@@ -58,16 +95,20 @@ ThView.prototype.rotateCamera = function(x, y) {
 	this.cameraDir.x = Math.sin(this.pan) * Math.cos(this.tilt);
 	this.cameraDir.z = Math.cos(this.pan) * Math.cos(this.tilt);
 	this.cameraDir.y = Math.sin(this.tilt);
-
 	this.camera.lookAt(this.cameraDir);
+
+	if (this.sync) {
+		this.sync.camera.lookAt(this.cameraDir);
+	}
+
 	this.oldPosition = pos;
+
+	this.moving = true;
 }
 
 ThView.prototype.setCameraDir = function(alpha, beta, gamma) {
-	if (this.mesh && !this.rotateInit) {
-		this.mesh.rotation.x += Math.PI / 2;
+	if (this.rotation) {
 		this.rotation = false;
-		this.rotateInit = true;
 	}
 
 	switch (window.orientation) {
@@ -113,16 +154,18 @@ ThView.prototype.zoomCamera = function(val) {
 	if (this.zoom > 130) this.zoom = 130;
 	this.camera.fov = this.zoom;
 	this.camera.updateProjectionMatrix();
+
+	if (this.sync) {
+		this.sync.camera.fov = this.zoom;
+		this.sync.camera.updateProjectionMatrix();
+	}
+
 }
 
 
 ///////// main process
 ThView.prototype.show = function() {
 	var self = this;
-	this.element = document.getElementById(this.id);
-	this.element.style.height = this.height + 'px';
-	this.element.style.width = this.width + 'px';
-	this.element.style.cursor = 'move';
 
 	///////// RENDERER
 	var renderer;
@@ -147,8 +190,14 @@ ThView.prototype.show = function() {
 		self.mousedown = true;
 		self.oldPosition = {x:e.pageX, y:e.pageY};
 	};
-	this.element.onmousemove = function(e) { self.rotateCamera(e.pageX, e.pageY); };
-	this.element.onclick = function() {self.toggleRotation();};
+	this.element.onmousemove = function(e) {
+		self.rotateCamera(e.pageX, e.pageY);
+	};
+	this.element.onclick = function() {
+		if (!self.moving)
+			self.toggleRotation();
+		self.moving = false;
+	};
 
 	// chrome / safari / IE
 	this.element.onmousewheel = function(e) {
@@ -189,17 +238,31 @@ ThView.prototype.show = function() {
 	var geometry = new THREE.SphereGeometry(100, 32, 16);
 
 	///////// TEXTURE
-	var texture = THREE.ImageUtils.loadTexture(this.file);
-	texture.flipY = false;
+	this.texture = new Array(this.file.length);
+	for (var i = 0; i < this.texture.length; i++) {
+		this.texture[i] = THREE.ImageUtils.loadTexture(this.file[i]);
+		this.texture[i].flipY = false;
+	}
 
 	///////// MATERIAL
-	var material = new THREE.MeshPhongMaterial({
+	this.material = new THREE.MeshPhongMaterial({
 		side: THREE.DoubleSide,
 		color: 0xffffff, specular: 0xcccccc, shininess:50, ambient: 0xffffff,
-		map: texture });
+		map: this.texture[this.imageNo] });
+
+	//// texture animation
+	if ((this.texture.length > 1) && (!self.isSlave)) {
+		setInterval(function() {
+			self.imageNo = (self.imageNo + 1) % self.texture.length;
+			self.material.map = self.texture[self.imageNo];
+			if (self.sync) {
+				self.sync.material.map = self.sync.texture[self.imageNo];
+			}
+		}, this.interval);
+	}
 
 	///////// MESH
-	this.mesh = new THREE.Mesh(geometry, material);
+	this.mesh = new THREE.Mesh(geometry, this.material);
 	if (this.rendererType == 0)
 		this.mesh.rotation.x += Math.PI;
 	this.mesh.rotation.x += this.degree[0];
@@ -210,8 +273,12 @@ ThView.prototype.show = function() {
 	///////// Draw Loop
 	function render() {
 		requestAnimationFrame(render);
-		if (self.rotation)
+		if ((self.rotation) && (!self.isSlave)) {
 			self.mesh.rotation.y += self.speed;
+			if (self.sync) {
+				self.sync.mesh.rotation.y += self.speed;
+			}
+		}
 		renderer.render(scene, self.camera);
 	};
 	render();

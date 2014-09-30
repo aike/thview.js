@@ -12,7 +12,7 @@ http://aikelab.net/thview/hmd2.html
 * direction control with mouse drag
 * zooming with mouse wheel
 * auto direction control according to acceleration sensor for mobile devices
-* fixed intervals Camera animation
+* fixed intervals camera animation
 * dual screen mode for Head Mount Display
 
 ##How To Use

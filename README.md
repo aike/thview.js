@@ -1,21 +1,21 @@
-##ThView.js - JavaScript Spherical Image Viewer
+## ThView.js - JavaScript Spherical Image Viewer
 
-##Description
+## Description
 ThView.js is a JavaScript image viewer program which shows spherical image photograph like [RICOH THETA](https://theta360.com/en/).
 
-##Demo Page
+## Demo Page
 http://aikelab.net/thview/  
 http://aikelab.net/thview/hmd.html  
 http://aikelab.net/thview/hmd2.html  
 
-##Features
+## Features
 * direction control with mouse drag
 * zooming with mouse wheel
 * auto direction control according to acceleration sensor for mobile devices
 * fixed intervals camera animation
 * dual screen mode for Head Mount Display
 
-##How To Use
+## How To Use
 load script with [Three.js](http://threejs.org/)
 
     <script type="text/javascript" src="three.min.js"></script>
@@ -68,7 +68,7 @@ HMD mode example
     </script>
 
 
-##Option
+## Option
 | keyword |   description   |  range |  default |
 |:----------:|:------------------|:--------:|:---------:|
 |  id  |  ID of parent div element (required)|  -   |  -  |
@@ -83,10 +83,10 @@ HMD mode example
 | hmd | dual screen for Head Mount Display | ture/false | false |
 | degree | array of axis angle [x, y, z]| [0..360,0..360,0..360] | [0,0,0] |
 
-##NOTE
+## NOTE
  - ThView.js requires web server. It does not work from local file.
  - The image file must be located at same origin.
  - The pixel size must be power of 2
 
-##Credit
+## Credit
 ThView.js is licenced under MIT License. Copyright 2014, aike (@aike1000)
